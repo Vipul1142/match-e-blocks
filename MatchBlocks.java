@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import javax.swing.*;
 
-public class Blocks extends JFrame {
+public class MatchBlocks extends JFrame {
     private static final long serialVersionUID = 1L;
     String themeList[] = { "Default", "Ben", "Cartoons", "DC", "Marvel", "Pokemon", "Programming", "TechBrands" };
     int tileClickCount = 0, firstTile, secondTile, score = 0;
@@ -75,7 +75,7 @@ public class Blocks extends JFrame {
         score = 0;
         buttonList.clear();
         gameFrame.dispose();
-        new Blocks().setGame();
+        new MatchBlocks().setGame();
     }
 
     void setButtonImageOnClick() {
@@ -98,8 +98,15 @@ public class Blocks extends JFrame {
                     score++;
                     setPairedButtonsOff();
                     if (score == 10) {
-                        JOptionPane.showMessageDialog(gameFrame, "**VICTORY**");
-                        resetGame();
+                        JOptionPane.showMessageDialog(gameFrame, "You have cleared all the blocks", "Congrats",
+                                JOptionPane.PLAIN_MESSAGE);
+                        int playAgain = JOptionPane.showConfirmDialog(gameFrame, "Do You want to Play the game again?",
+                                "Play Again?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                        if (playAgain == 0) {
+                            resetGame();
+                        } else {
+                            gameFrame.dispose();
+                        }
                     }
                 }
             }
@@ -134,11 +141,11 @@ public class Blocks extends JFrame {
         if (tileClickCount == 0) {
             firstTile = currentTileIndex;
         }
+        secondTile = currentTileIndex;
         if (firstTile == secondTile) {
             tileClickCount = 0;
         }
         setButtonImageOnClick();
-        secondTile = currentTileIndex;
         if (tileClickCount == 1) {
             secondClickTreat();
         }
@@ -185,6 +192,6 @@ public class Blocks extends JFrame {
     }
 
     public static void main(final String arg[]) {
-        new Blocks().setGame();
+        new MatchBlocks().setGame();
     }
 }

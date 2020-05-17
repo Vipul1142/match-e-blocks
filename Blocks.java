@@ -97,6 +97,10 @@ public class Blocks extends JFrame {
                 if (isPairFound()) {
                     score++;
                     setPairedButtonsOff();
+                    if (score == 10) {
+                        JOptionPane.showMessageDialog(gameFrame, "**VICTORY**");
+                        resetGame();
+                    }
                 }
             }
         });
@@ -139,10 +143,6 @@ public class Blocks extends JFrame {
             secondClickTreat();
         }
         tileClickCount = (tileClickCount + 1) % 2;
-        if (score == 10) {
-            JOptionPane.showMessageDialog(gameFrame, "**VICTORY**");
-            resetGame();
-        }
     }
 
     void gamePlay() {

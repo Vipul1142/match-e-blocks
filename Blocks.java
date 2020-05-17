@@ -9,9 +9,9 @@ import javax.swing.*;
 public class Blocks extends JFrame {
     private static final long serialVersionUID = 1L;
     String themeList[] = { "Default", "Ben", "Cartoons", "DC", "Marvel", "Pokemon", "Programming", "TechBrands" };
-    int tileClickCount = 0, tileToMatch, currentClickedBlock, score = 0;
+    int tileClickCount = 0, firstTile, secondTile, score = 0;
     Color themeColor = Color.CYAN;
-    JFrame mainWindow = new JFrame("New Game");
+    JFrame gameFrame = new JFrame("Match Blocks");
     JPanel buttonPanel = new JPanel(new GridLayout(4, 5));
     ArrayList<JButton> buttonList = new ArrayList<JButton>();
     ArrayList<ImageIcon> imageList = new ArrayList<ImageIcon>();
@@ -21,31 +21,34 @@ public class Blocks extends JFrame {
 
     void createButtons() {
         for (int count = 0; count < 20; ++count) {
-            final JButton button = new JButton();
-            button.setBackground(themeColor);
-            buttonList.add(button);
+            final JButton tempButton = new JButton();
+            tempButton.setBackground(themeColor);
+            buttonList.add(tempButton);
 
-            button.addActionListener(new ActionListener() {
-
+            tempButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent evt) {
-                    currentClickedBlock = buttonList.indexOf(evt.getSource());
-                    gamePlay(currentClickedBlock);
+                    int currentTileIndex = buttonList.indexOf(evt.getSource());
+                    blockClickedAction(currentTileIndex);
                 }
 
             });
-            buttonPanel.add(button);
+            buttonPanel.add(tempButton);
         }
     }
 
     void initiateFrame() {
         final ImageIcon appIcon = new ImageIcon("./images/icon.png");
-        mainWindow.setIconImage(appIcon.getImage());
-        mainWindow.setLocationByPlatform(true);
-        mainWindow.setSize(650, 600);
-        mainWindow.setResizable(false);
-        mainWindow.setLayout(null);
-        mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainWindow.setVisible(true);
+        gameFrame.setIconImage(appIcon.getImage());
+        gameFrame.setLocationByPlatform(true);
+        gameFrame.setSize(650, 600);
+        gameFrame.setResizable(false);
+        gameFrame.setLayout(null);
+        gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        gameFrame.setVisible(true);
+        gameFrame.add(themeSelector);
+        gameFrame.add(resetButton);
+        gameFrame.add(colorChooser);
+        gameFrame.add(buttonPanel);
         themeSelector.setBounds(75, 10, 120, 25);
         resetButton.setBounds(250, 10, 110, 25);
         colorChooser.setBounds(425, 10, 150, 25);
@@ -53,20 +56,16 @@ public class Blocks extends JFrame {
         resetButton.setBackground(themeColor);
         colorChooser.setBackground(themeColor);
         themeSelector.setBackground(themeColor);
-        mainWindow.add(themeSelector);
-        mainWindow.add(resetButton);
-        mainWindow.add(colorChooser);
-        mainWindow.add(buttonPanel);
     }
 
     void setTheme() {
-        final String theme = (String) themeSelector.getSelectedItem();
         imageList.clear();
+        final String theme = (String) themeSelector.getSelectedItem();
         for (int index = 0; index < 10; index++) {
-            final String imagePath = "./images/" + theme + "/image" + Integer.toString(index) + ".png";
-            final ImageIcon image = new ImageIcon(imagePath);
-            imageList.add(image);
-            imageList.add(image);
+            final String currentImagePath = "./images/" + theme + "/image" + Integer.toString(index) + ".png";
+            final ImageIcon currentImage = new ImageIcon(currentImagePath);
+            imageList.add(currentImage);
+            imageList.add(currentImage);
         }
         Collections.shuffle(imageList);
     }
@@ -75,30 +74,29 @@ public class Blocks extends JFrame {
         tileClickCount = 0;
         score = 0;
         buttonList.clear();
-        imageList.clear();
-        mainWindow.dispose();
+        gameFrame.dispose();
         new Blocks().setGame();
     }
 
-    void setButtonImage() {
-        for (JButton button : buttonList) {
-            button.setIcon(null);
+    void setButtonImageOnClick() {
+        for (JButton tempButton : buttonList) {
+            tempButton.setIcon(null);
         }
         if (tileClickCount == 1) {
-            buttonList.get(tileToMatch).setIcon(imageList.get(tileToMatch));
+            buttonList.get(firstTile).setIcon(imageList.get(firstTile));
         }
-        buttonList.get(currentClickedBlock).setIcon(imageList.get(currentClickedBlock));
+        buttonList.get(secondTile).setIcon(imageList.get(secondTile));
     }
 
     void secondClickTreat() {
-        Timer timer = new Timer(200, new ActionListener() {
+        Timer timer = new Timer(100, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                buttonList.get(tileToMatch).setIcon(null);
-                buttonList.get(currentClickedBlock).setIcon(null);
+                buttonList.get(firstTile).setIcon(null);
+                buttonList.get(secondTile).setIcon(null);
                 if (isPairFound()) {
                     score++;
-                    setButtonsOff();
+                    setPairedButtonsOff();
                 }
             }
         });
@@ -107,7 +105,7 @@ public class Blocks extends JFrame {
     }
 
     boolean isPairFound() {
-        return imageList.get(currentClickedBlock) == imageList.get(tileToMatch);
+        return imageList.get(secondTile) == imageList.get(firstTile);
     }
 
     void setColor() {
@@ -123,30 +121,31 @@ public class Blocks extends JFrame {
         themeSelector.setBackground(themeColor);
     }
 
-    void setButtonsOff() {
-        buttonList.get(tileToMatch).setVisible(false);
-        buttonList.get(currentClickedBlock).setVisible(false);
+    void setPairedButtonsOff() {
+        buttonList.get(firstTile).setVisible(false);
+        buttonList.get(secondTile).setVisible(false);
     }
 
-    void gamePlay(int currentClickedBlock) {
+    void blockClickedAction(int currentTileIndex) {
         if (tileClickCount == 0) {
-            tileToMatch = currentClickedBlock;
+            firstTile = currentTileIndex;
         }
-        if (tileToMatch == currentClickedBlock) {
+        if (firstTile == secondTile) {
             tileClickCount = 0;
         }
-        setButtonImage();
+        setButtonImageOnClick();
+        secondTile = currentTileIndex;
         if (tileClickCount == 1) {
             secondClickTreat();
         }
         tileClickCount = (tileClickCount + 1) % 2;
         if (score == 10) {
-            JOptionPane.showMessageDialog(mainWindow, "**VICTORY**");
+            JOptionPane.showMessageDialog(gameFrame, "**VICTORY**");
             resetGame();
         }
     }
 
-    void startGame() {
+    void gamePlay() {
 
         resetButton.addActionListener(new ActionListener() {
 
@@ -167,10 +166,10 @@ public class Blocks extends JFrame {
             public void actionPerformed(ActionEvent evt) {
                 if (score == 0) {
                     setTheme();
-                    buttonList.get(tileToMatch).setIcon(null);
+                    buttonList.get(firstTile).setIcon(null);
                     tileClickCount = 0;
                 } else {
-                    JOptionPane.showMessageDialog(mainWindow, "Game Has Already started!", "Stop",
+                    JOptionPane.showMessageDialog(gameFrame, "Game Has Already started!", "Stop",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -182,18 +181,9 @@ public class Blocks extends JFrame {
         createButtons();
         initiateFrame();
         setTheme();
-        startGame();
+        gamePlay();
     }
 
-    /*
-     * public void actionPActionEvent event) { if (event.getSource() == resetButton)
-     * { resetGame(); } else if (event.getSource() == colorChooser) { setColor(); }
-     * else if (event.getSource() == themeSelector) { if (score == 0) { setTheme();
-     * } else { JOptionPane.showMessageDialog(mainWindow,
-     * "Game Has Already started!", "Stop", JOptionPane.ERROR_MESSAGE); } } else {
-     * currentClickedBlock = buttonList.indexOf(event.getSource());
-     * gamePlay(currentClickedBlock); } }
-     */
     public static void main(final String arg[]) {
         new Blocks().setGame();
     }
